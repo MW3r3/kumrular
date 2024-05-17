@@ -393,10 +393,11 @@ void loop() {
   dt = (current_time - prev_time)/1000000.0;
 
   loopBlink(); //Indicate we are in main loop with short blink every 1.5 seconds
+  
 
   //Print data at 100hz (uncomment one at a time for troubleshooting) - SELECT ONE:
   //printRadioData();     //Prints radio pwm values (expected: 1000 to 2000)
-  //printDesiredState();  //Prints desired vehicle state commanded in either degrees or deg/sec (expected: +/- maxAXIS for roll, pitch, yaw; 0 to 1 for throttle)
+  printDesiredState();  //Prints desired vehicle state commanded in either degrees or deg/sec (expected: +/- maxAXIS for roll, pitch, yaw; 0 to 1 for throttle)
   //printGyroData();      //Prints filtered gyro data direct from IMU (expected: ~ -250 to 250, 0 at rest)
   //printAccelData();     //Prints filtered accelerometer data direct from IMU (expected: ~ -2 to 2; x,y 0 when level, z 1 when level)
   //printMagData();       //Prints filtered magnetometer data direct from IMU (expected: ~ -300 to 300)
@@ -405,7 +406,7 @@ void loop() {
   //printMotorCommands(); //Prints the values being written to the motors (expected: 120 to 250)
   //printServoCommands(); //Prints the values being written to the servos (expected: 0 to 180)
   //printLoopRate();      //Prints the time between loops in microseconds (expected: microseconds between loop iterations)
-
+  
   // Get arming status
   armedStatus(); //Check if the throttle cut is off and throttle is low.
 
@@ -471,19 +472,19 @@ void controlMixer() {
    *channel_6_pwm - free auxillary channel, can be used to toggle things with an 'if' statement
    */
    
-  //Quad mixing - EXAMPLE
-  m1_command_scaled = thro_des - pitch_PID + roll_PID + yaw_PID; //Front Left
-  m2_command_scaled = thro_des - pitch_PID - roll_PID - yaw_PID; //Front Right
-  m3_command_scaled = thro_des + pitch_PID - roll_PID + yaw_PID; //Back Right
-  m4_command_scaled = thro_des + pitch_PID + roll_PID - yaw_PID; //Back Left
+  //Quad mixing for oneShot125 escs
+  m1_command_scaled = 0; //thro_des - pitch_PID + roll_PID + yaw_PID; //Front Left
+  m2_command_scaled = 0; //thro_des - pitch_PID - roll_PID - yaw_PID; //Front Right
+  m3_command_scaled = 0; //thro_des + pitch_PID - roll_PID + yaw_PID; //Back Right
+  m4_command_scaled = 0; //thro_des + pitch_PID + roll_PID - yaw_PID; //Back Left
   m5_command_scaled = 0;
   m6_command_scaled = 0;
 
   //0.5 is centered servo, 0.0 is zero throttle if connecting to ESC for conventional PWM, 1.0 is max throttle
-  s1_command_scaled = 0;
-  s2_command_scaled = 0;
-  s3_command_scaled = 0;
-  s4_command_scaled = 0;
+  s1_command_scaled = thro_des - roll_PID ; //front right
+  s2_command_scaled = thro_des + roll_PID ; //Front Left
+  s3_command_scaled = thro_des + pitch_PID; //BACK
+  s4_command_scaled = 0.5 + yaw_PID;
   s5_command_scaled = 0;
   s6_command_scaled = 0;
   s7_command_scaled = 0;
@@ -1457,21 +1458,21 @@ void throttleCut() {
   */
   if ((channel_5_pwm > 1500) || (armedFly == false)) {
     armedFly = false;
-    m1_command_PWM = 120;
-    m2_command_PWM = 120;
-    m3_command_PWM = 120;
-    m4_command_PWM = 120;
-    m5_command_PWM = 120;
-    m6_command_PWM = 120;
+    //m1_command_PWM = 120;
+    //m2_command_PWM = 120;
+    //m3_command_PWM = 120;
+    //m4_command_PWM = 120;
+    //m5_command_PWM = 120;
+    //m6_command_PWM = 120;
 
     //Uncomment if using servo PWM variables to control motor ESCs
-    //s1_command_PWM = 0;
-    //s2_command_PWM = 0;
-    //s3_command_PWM = 0;
-    //s4_command_PWM = 0;
-    //s5_command_PWM = 0;
-    //s6_command_PWM = 0;
-    //s7_command_PWM = 0;
+    s1_command_PWM = 0;
+    s2_command_PWM = 0;
+    s3_command_PWM = 0;
+    s4_command_PWM = 0;
+    s5_command_PWM = 0;
+    s6_command_PWM = 0;
+    s7_command_PWM = 0;
   }
 }
 
